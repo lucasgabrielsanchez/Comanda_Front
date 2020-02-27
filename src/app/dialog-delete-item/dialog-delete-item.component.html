@@ -1,0 +1,14 @@
+<mat-progress-bar
+   mode="indeterminate"
+   *ngIf="spinnerEliminarItem"
+></mat-progress-bar>
+<ol>
+   <li>
+      <h1>¿Está seguro/a de eliminar el item "{{ data.nombre }}"?</h1>
+   </li>
+   <li>
+      <button mat-raised-button color="warn" (click)="eliminarItem()">
+         Eliminar
+      </button>
+   </li>
+</ol>

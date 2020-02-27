@@ -1,0 +1,1478 @@
+﻿<mat-accordion>
+      <mat-expansion-panel (opened)="flagCargarPedido = !flagCargarPedido; consultarAsignacion()" (closed)="flagCargarPedido = !flagCargarPedido" *ngIf="dataUserForHome.perfil === 'Cliente'">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerMesasCliente"></mat-progress-bar>
+          <mat-expansion-panel-header class="right-aligned-header">
+              <mat-panel-title>
+                  Cargar Pedido
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento en el que usted podrá hacer un pedido.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="container row" *ngIf="flagCargarPedido && mesaAsignada && mesaAsignada != 1">
+              <div class="col-6">
+                  <mat-accordion>
+                      <mat-expansion-panel (opened)="traerItemsCliente()">
+                          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerItems"></mat-progress-bar>
+                          <mat-expansion-panel-header>
+                              <mat-panel-title>
+                                  Selección de Items
+                              </mat-panel-title>
+                              <mat-panel-description>
+                                  Lista de ítems
+                              </mat-panel-description>
+                          </mat-expansion-panel-header>
+                          <div class="container row">
+                              <div class="col-sm-4" *ngFor="let item of itemsCliente">
+                                  <div class="card" (click)="cargarItemPedido(item)">
+                                      <div class="image">
+                                          <!-- <img src="http://loremflickr.com/320/150?random=4" /> -->
+                                          <img src="{{ pathToItemPhoto }}{{ item.foto }}" />
+                                      </div>
+                                      <div class="card-inner">
+                                          <div class="header"></div>
+                                          <div class="content">
+                                              <p>{{ item.nombre }}</p>
+                                              <p><b>Precio:</b>{{ item.precio }}</p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </mat-expansion-panel>
+                  </mat-accordion>
+              </div>
+              <div class="col-6">
+                  <div class="card" *ngIf="mesaAsignada != null">
+                      <div class="image">
+                          <!-- <img src="http://loremflickr.com/320/150?random=4" /> -->
+                          <!-- <img src="{{ pathToItemPhoto }}{{ item.foto }}" /> -->
+                      </div>
+                      <div class="card-inner">
+                          <div class="card-header d-flex justify-content-center">
+                              <mat-nav-list *ngIf="mesaAsignada != null; else elseBlock">
+                                  <mat-list-item>
+                                      <a matLine>Mesa Asignada:</a>
+                                      <b>{{ mesaAsignada.codigo_mesa }}</b>
+                                  </mat-list-item>
+                              </mat-nav-list>
+                              <ng-template #elseBlock>Debe elegir una mesa para verla aquí.</ng-template>
+                          </div>
+                          <div class="card-header d-flex justify-content-center">
+                              Detalle de su Pedido:
+                          </div>
+                          <div class="content">
+                              <mat-nav-list>
+                                  <mat-list-item *ngFor="let itemPedido of itemsPedido">
+                                      <a matLine>{{ itemPedido.nombre }}</a>
+                                      <b>{{ itemPedido.cantidad }}</b>
+                                      <button mat-icon-button color="warn" (click)="quitarItemPedido(itemPedido)">
+                                          <mat-icon>delete_sweep</mat-icon>
+                                      </button>
+                                  </mat-list-item>
+                              </mat-nav-list>
+                              <!-- <p>{{ item.nombre }}</p>
+                       <p><b>Precio:</b>{{ item.precio }}</p> -->
+                          </div>
+                          <div class="card-footer d-flex justify-content-center">
+                              <button mat-raised-button color="primary" (click)="cargarPedido()">
+                                  Pedir
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="alert alert-warning" role="alert" *ngIf="mesaAsignada == 1">
+              <h4 class="alert-heading">Señor Cliente:</h4>
+              <p>
+                  Para poder realizar un pedido, debe solicitarle al Mozo que le asigne una mesa. Disculpe las molestias ocasionadas.
+              </p>
+              <hr />
+              <p class="mb-0">Muchas Gracias.</p>
+          </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel *ngIf="dataUserForHome.perfil === 'Mozo'">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerCargarItem"></mat-progress-bar>
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Cargar Item
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para cargar un item.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+          <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+              <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Nombre" formControlName="nombre" />
+              </mat-form-field>
+  
+              <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Precio" formControlName="precio" />
+              </mat-form-field>
+  
+              <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Sector" formControlName="sector" />
+              </mat-form-field>
+  
+              <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Estado" formControlName="estado" />
+              </mat-form-field>
+  
+              <mat-form-field class="example-full-width">
+                  <input matInput placeholder="Tiempo Estimado de Preparación" formControlName="tiempo_estimado_preparacion" />
+              </mat-form-field>
+  
+              <image-upload (uploadFinished)="onUploadFinished($event)"></image-upload>
+  
+              <button mat-raised-button color="primary" type="submit" [disabled]="!profileForm.valid">
+                  Cargar
+              </button>
+          </form>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel (opened)="traerItems()" *ngIf="dataUserForHome.perfil === 'Mozo'">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerItems"></mat-progress-bar>
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Consultar Items
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para consultar los items.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+          <table mat-table [dataSource]="items" class="mat-elevation-z8">
+              <!-- Columna Nombre -->
+              <ng-container matColumnDef="nombre">
+                  <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                  <td mat-cell *matCellDef="let element">{{ element.nombre }}</td>
+              </ng-container>
+  
+              <!-- Columna Precio -->
+              <ng-container matColumnDef="precio">
+                  <th mat-header-cell *matHeaderCellDef>Precio</th>
+                  <td mat-cell *matCellDef="let element">{{ element.precio }}</td>
+              </ng-container>
+  
+              <!-- Columna Sector -->
+              <ng-container matColumnDef="sector">
+                  <th mat-header-cell *matHeaderCellDef>Sector</th>
+                  <td mat-cell *matCellDef="let element">{{ element.sector }}</td>
+              </ng-container>
+  
+              <!-- Columna Estado -->
+              <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
+              </ng-container>
+  
+              <!-- Columna Tiempo -->
+              <ng-container matColumnDef="tiempo">
+                  <th mat-header-cell *matHeaderCellDef>Tiempo</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.tiempo_estimado_preparacion }}
+                  </td>
+              </ng-container>
+  
+              <!-- Columna Foto -->
+              <ng-container matColumnDef="foto">
+                  <th mat-header-cell *matHeaderCellDef>Foto</th>
+                  <td mat-cell *matCellDef="let element">
+                      <!-- <image-upload
+                    (uploadFinished)="onUploadFinished($event)"
+                 ></image-upload> -->
+                      <div class="parent">
+                          <img class="img_resize" src="{{ pathToItemPhoto }}{{ element.foto }}" />
+                      </div>
+                  </td>
+              </ng-container>
+  
+              <!-- Columna Acciones -->
+              <ng-container matColumnDef="acciones">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let element">
+                      <button mat-mini-fab color="primary" (click)="openDialog(element)">
+                          <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-mini-fab color="warn" style="margin-left: 30px;" (click)="openDialogDelete(element)">
+                          <mat-icon>close</mat-icon>
+                      </button>
+                      <!-- <button mat-icon-button color="primary">
+                    <mat-icon>edit</mat-icon>
+                 </button> -->
+                  </td>
+              </ng-container>
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel (opened)="traerPedidosSector()" *ngIf="
+           dataUserForHome.perfil === 'Cocinero' ||
+           dataUserForHome.perfil === 'Bartender' ||
+           dataUserForHome.perfil === 'Cervecero'
+        ">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerPedidosSector"></mat-progress-bar>
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Consultar Pedidos del Sector
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para consultar los pedidos.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div *ngIf="pedidosSector && pedidosSector.pedidos.length > 0">
+              <p>
+                  <b>{{ pedidosSector.mensaje }}</b>
+              </p>
+              <!-- {{ pedidosSector | json }} -->
+              <table mat-table [dataSource]="pedidosSector.pedidos" class="mat-elevation-z8">
+                  <!-- Columna Comanda -->
+                  <ng-container matColumnDef="id_comanda">
+                      <th mat-header-cell *matHeaderCellDef>Comanda</th>
+                      <td mat-cell *matCellDef="let element">
+                          {{ element.id_comanda }}
+                      </td>
+                  </ng-container>
+  
+                  <!-- Columna Estado -->
+                  <ng-container matColumnDef="estado">
+                      <th mat-header-cell *matHeaderCellDef>Estado</th>
+                      <td mat-cell *matCellDef="let element">{{ element.estado }}</td>
+                  </ng-container>
+  
+                  <!-- Columna Nombre -->
+                  <ng-container matColumnDef="nombre">
+                      <th mat-header-cell *matHeaderCellDef>Nombre</th>
+                      <td mat-cell *matCellDef="let element">{{ element.nombre }}</td>
+                  </ng-container>
+  
+                  <!-- Columna Cantidad -->
+                  <ng-container matColumnDef="cantidad">
+                      <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+                      <td mat-cell *matCellDef="let element">
+                          {{ element.cantidad }}
+                      </td>
+                  </ng-container>
+  
+                  <!-- Columna Foto -->
+                  <ng-container matColumnDef="foto">
+                      <th mat-header-cell *matHeaderCellDef>Foto</th>
+                      <td mat-cell *matCellDef="let element">
+                          <!-- <image-upload
+                             (uploadFinished)="onUploadFinished($event)"
+                          ></image-upload> -->
+                          <div class="parent">
+                              <img class="img_resize" src="{{ pathToItemPhoto }}{{ element.foto }}" />
+                          </div>
+                      </td>
+                  </ng-container>
+  
+                  <!-- Columna Acciones -->
+                  <ng-container matColumnDef="acciones">
+                      <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                      <td mat-cell *matCellDef="let element">
+                          <button type="button" class="btn btn-primary" *ngIf="element.estado === 'derivado'" (click)="marcharPedido(element)">
+                              Tomar
+                          </button>
+                          <button type="button" class="btn btn-success" *ngIf="element.estado === 'en preparacion'" (click)="terminarPedido(element)">
+                              Terminar
+                          </button>
+                          <!-- <button mat-icon-button color="primary">
+                          <mat-icon>edit</mat-icon>
+                       </button> -->
+                      </td>
+                  </ng-container>
+  
+                  <tr mat-header-row *matHeaderRowDef="displayedColumnsPedidoSector"></tr>
+                  <tr mat-row *matRowDef="let row; columns: displayedColumnsPedidoSector"></tr>
+              </table>
+          </div>
+          <div *ngIf="pedidosSector && pedidosSector.pedidos.length < 1">
+              <p>
+                  <b>No hay pedidos pendientes por el momento.</b>
+              </p>
+          </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel (opened)="traerPedidos()" (closed)="finalizarTraerPedidos()" *ngIf="
+           dataUserForHome.perfil === 'Mozo'">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerPedidos"></mat-progress-bar>
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Consultar Pedidos
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para consultar los pedidos.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+  
+          <label id="example-radio-group-label">
+              <h3>
+              <span class="badge badge-pill badge-light"
+                 >Seleccione el filtro deseado:</span
+              >
+           </h3>
+          </label>
+  
+          <mat-radio-group aria-labelledby="example-radio-group-label" class="example-radio-group" [(ngModel)]="filtroDeseado">
+              <mat-radio-button class="example-radio-button" [value]="'listo para servir'" (change)="filtrar($event)">
+                  Listo para servir
+              </mat-radio-button>
+              <mat-radio-button class="example-radio-button" [value]="'en preparacion'" (change)="filtrar($event)">
+                  En preparación
+              </mat-radio-button>
+              <mat-radio-button class="example-radio-button" [value]="' '" (change)="filtrar($event)">
+                  Todos
+              </mat-radio-button>
+          </mat-radio-group>
+  
+          <table mat-table [dataSource]="pedidosFiltrados" multiTemplateDataRows class="mat-elevation-z8">
+              <!-- Comanda -->
+              <ng-container matColumnDef="id_comanda">
+                  <th mat-header-cell *matHeaderCellDef>Comanda</th>
+                  <td mat-cell *matCellDef="let element">{{ element.id_comanda }}</td>
+              </ng-container>
+  
+              <!-- Mesa -->
+              <ng-container matColumnDef="codigo_mesa">
+                  <th mat-header-cell *matHeaderCellDef>Mesa</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.codigo_mesa }}
+                  </td>
+              </ng-container>
+  
+              <!--Estado -->
+              <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.estado | titlecase }}
+                  </td>
+              </ng-container>
+  
+              <!-- Fecha y Hora de Inicio -->
+              <ng-container matColumnDef="fecha_hora_inicio">
+                  <th mat-header-cell *matHeaderCellDef>Fecha y Hora de Inicio</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.fecha_hora_inicio }}
+                  </td>
+              </ng-container>
+  
+              <!-- Tiempo Estimado -->
+              <ng-container matColumnDef="tiempo_estimado_preparacion_minutos">
+                  <th mat-header-cell *matHeaderCellDef>Tiempo Estimado</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.tiempo_estimado_preparacion_minutos }}'
+                  </td>
+              </ng-container>
+  
+              <!-- Fecha y Hora de Fin -->
+              <ng-container matColumnDef="fecha_hora_fin">
+                  <th mat-header-cell *matHeaderCellDef>Fecha y Hora de Fin</th>
+  
+                  <td mat-cell *matCellDef="let element">
+                      <div *ngIf="element.fecha_hora_fin; else elseBlock">
+                          {{ element.fecha_hora_fin }}
+                      </div>
+                      <ng-template #elseBlock>
+                          Aún no finalizó el Pedido
+                      </ng-template>
+                  </td>
+              </ng-container>
+  
+              <!-- Cliente -->
+              <ng-container matColumnDef="cliente">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.cliente_nombre + " " + element.cliente_apellido }}
+                  </td>
+              </ng-container>
+
+              <!-- Columna Foto -->
+              <ng-container matColumnDef="cliente_foto">
+                    <th mat-header-cell *matHeaderCellDef>Foto Cliente</th>
+                    <td mat-cell *matCellDef="let element">
+                        <!-- <image-upload
+                           (uploadFinished)="onUploadFinished($event)"
+                        ></image-upload> -->
+                        <div class="parent">
+                            <img class="img_resize" src="{{ pathToItemPhoto }}{{ element.cliente_foto }}" />
+                        </div>
+                    </td>
+                </ng-container>
+  
+              <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+              <ng-container matColumnDef="expandedDetail">
+                  <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumnsPedido.length">
+                      <div class="example-element-detail" [@detailExpand]="
+                       element.id_comanda == expandedElementEdit.id_comanda
+                          ? 'expanded'
+                          : 'collapsed'
+                    ">
+                          <!-- [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"> -->
+  
+                          <div class="example-element-description">
+                              <table mat-table [dataSource]="element.pedidoItems" class="mat-elevation-z8" *ngIf="
+                             element.pedidoItems &&
+                                element.pedidoItems.length > 0;
+                             else elseBlock
+                          ">
+                                  <!-- <div class="example-element-description">
+                       <table
+                          mat-table
+                          [dataSource]="element.pedidoItems"
+                          class="mat-elevation-z8"
+                       > -->
+                                  <!-- Columna Nombre -->
+                                  <ng-container matColumnDef="nombre">
+                                      <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.nombre }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Cantidad -->
+                                  <ng-container matColumnDef="cantidad">
+                                      <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.cantidad }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Foto -->
+                                  <ng-container matColumnDef="foto">
+                                      <th mat-header-cell *matHeaderCellDef>Foto</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          <!-- <image-upload
+                                                        (uploadFinished)="onUploadFinished($event)"
+                                                     ></image-upload> -->
+                                          <div class="parent">
+                                              <img class="img_resize" src="{{ pathToItemPhoto }}{{
+                                         element.foto
+                                      }}" />
+                                          </div>
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Sector -->
+                                  <ng-container matColumnDef="sector">
+                                      <th mat-header-cell *matHeaderCellDef>Sector</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.sector }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!--Empleado/a -->
+                                  <ng-container matColumnDef="empleado">
+                                      <th mat-header-cell *matHeaderCellDef>Empleado/a</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          <div *ngIf="element.empleado; else elseBlock">
+                                              {{ element.empleado }}
+                                          </div>
+                                          <ng-template #elseBlock>
+                                              Aún no tomado
+                                          </ng-template>
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Estado -->
+                                  <ng-container matColumnDef="estado">
+                                      <th mat-header-cell *matHeaderCellDef>Estado</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.estado }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <tr mat-header-row *matHeaderRowDef="
+                                displayedColumnsPedidoSectorSinAcciones
+                             "></tr>
+                                  <tr mat-row *matRowDef="
+                                let row;
+                                columns: displayedColumnsPedidoSectorSinAcciones
+                             "></tr>
+                              </table>
+  
+                              <ng-template #elseBlock>
+                                  <p>
+                                      <b> No hay artículos solicitados en este pedido.</b>
+                                  </p>
+                              </ng-template>
+                          </div>
+                      </div>
+                  </td>
+              </ng-container>
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsPedido"></tr>
+              <tr mat-row *matRowDef="let element; columns: displayedColumnsPedido" class="example-element-row" (click)="
+                 copiarObjetito(element);
+                 expandedElement =
+                    expandedElementEdit.id_comanda == element.id_comanda
+                       ? null
+                       : element
+              "></tr>
+              <!-- [class.example-expanded-row]="expandedElement === element" -->
+              <!-- (click)="expandedElement = expandedElement === element ? null : element;" -->
+              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+          </table>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel (opened)="traerPedidos()" (closed)="finalizarTraerPedidos()" *ngIf="
+           dataUserForHome.perfil === 'Admin'">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerPedidos"></mat-progress-bar>
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Consultar Pedidos
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para consultar los pedidos.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+  
+          <label id="example-radio-group-label">
+              <h3>
+              <span class="badge badge-pill badge-light"
+                 >Seleccione el filtro deseado:</span
+              >
+           </h3>
+          </label>
+  
+          <mat-radio-group aria-labelledby="example-radio-group-label" class="example-radio-group" [(ngModel)]="filtroDeseado">
+              <mat-radio-button class="example-radio-button" [value]="'listo para servir'" (change)="filtrar($event)">
+                  Listo para servir
+              </mat-radio-button>
+              <mat-radio-button class="example-radio-button" [value]="'en preparacion'" (change)="filtrar($event)">
+                  En preparación
+              </mat-radio-button>
+              <mat-radio-button class="example-radio-button" [value]="' '" (change)="filtrar($event)">
+                  Todos
+              </mat-radio-button>
+          </mat-radio-group>
+  
+          <table mat-table [dataSource]="pedidosFiltrados" multiTemplateDataRows class="mat-elevation-z8">
+              <!-- Comanda -->
+              <ng-container matColumnDef="id_comanda">
+                  <th mat-header-cell *matHeaderCellDef>Comanda</th>
+                  <td mat-cell *matCellDef="let element">{{ element.id_comanda }}</td>
+              </ng-container>
+  
+              <!-- Mesa -->
+              <ng-container matColumnDef="codigo_mesa">
+                  <th mat-header-cell *matHeaderCellDef>Mesa</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.codigo_mesa }}
+                  </td>
+              </ng-container>
+  
+              <!--Estado -->
+              <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.estado | titlecase }}
+                  </td>
+              </ng-container>
+  
+              <!-- Fecha y Hora de Inicio -->
+              <ng-container matColumnDef="fecha_hora_inicio">
+                  <th mat-header-cell *matHeaderCellDef>Fecha y Hora de Inicio</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.fecha_hora_inicio }}
+                  </td>
+              </ng-container>
+  
+              <!-- Tiempo Estimado -->
+              <ng-container matColumnDef="tiempo_estimado_preparacion_minutos">
+                  <th mat-header-cell *matHeaderCellDef>Tiempo Estimado</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.tiempo_estimado_preparacion_minutos }}'
+                  </td>
+              </ng-container>
+  
+              <!-- Fecha y Hora de Fin -->
+              <ng-container matColumnDef="fecha_hora_fin">
+                  <th mat-header-cell *matHeaderCellDef>Fecha y Hora de Fin</th>
+  
+                  <td mat-cell *matCellDef="let element">
+                      <div *ngIf="element.fecha_hora_fin; else elseBlock">
+                          {{ element.fecha_hora_fin }}
+                      </div>
+                      <ng-template #elseBlock>
+                          Aún no finalizó el Pedido
+                      </ng-template>
+                  </td>
+              </ng-container>
+  
+              <!-- Cliente -->
+              <ng-container matColumnDef="cliente">
+                  <th mat-header-cell *matHeaderCellDef>Cliente</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.cliente_nombre + " " + element.cliente_apellido }}
+                  </td>
+              </ng-container>
+
+              <!-- Columna Foto -->
+              <ng-container matColumnDef="cliente_foto">
+                    <th mat-header-cell *matHeaderCellDef>Foto Cliente</th>
+                    <td mat-cell *matCellDef="let element">
+                        <!-- <image-upload
+                           (uploadFinished)="onUploadFinished($event)"
+                        ></image-upload> -->
+                        <div class="parent">
+                            <img class="img_resize" src="{{ pathToItemPhoto }}{{ element.cliente_foto }}" />
+                        </div>
+                    </td>
+                </ng-container>
+
+                <!-- Columna Acciones -->
+                <ng-container matColumnDef="acciones">
+                    <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                    <td mat-cell *matCellDef="let element">
+                        <button type="button" class="btn btn-primary" *ngIf="element.estado === 'listo para servir'" (click)="generatePdf(element)">
+                            Ticket
+                        </button>
+                        <h4 *ngIf="element.estado !== 'listo para servir'"><span class="badge badge-warning">En Preparación.</span></h4>
+                    </td>
+                </ng-container>
+  
+              <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+              <ng-container matColumnDef="expandedDetail">
+                  <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumnsPedidoAdmin.length">
+                      <div class="example-element-detail" [@detailExpand]="
+                       element.id_comanda == expandedElementEdit.id_comanda
+                          ? 'expanded'
+                          : 'collapsed'
+                    ">
+                          <!-- [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"> -->
+  
+                          <div class="example-element-description">
+                              <table mat-table [dataSource]="element.pedidoItems" class="mat-elevation-z8" *ngIf="
+                             element.pedidoItems &&
+                                element.pedidoItems.length > 0;
+                             else elseBlock
+                          ">
+                                  <!-- <div class="example-element-description">
+                       <table
+                          mat-table
+                          [dataSource]="element.pedidoItems"
+                          class="mat-elevation-z8"
+                       > -->
+                                  <!-- Columna Nombre -->
+                                  <ng-container matColumnDef="nombre">
+                                      <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.nombre }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Cantidad -->
+                                  <ng-container matColumnDef="cantidad">
+                                      <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.cantidad }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Foto -->
+                                  <ng-container matColumnDef="foto">
+                                      <th mat-header-cell *matHeaderCellDef>Foto</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          <!-- <image-upload
+                                                        (uploadFinished)="onUploadFinished($event)"
+                                                     ></image-upload> -->
+                                          <div class="parent">
+                                              <img class="img_resize" src="{{ pathToItemPhoto }}{{
+                                         element.foto
+                                      }}" />
+                                          </div>
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Sector -->
+                                  <ng-container matColumnDef="sector">
+                                      <th mat-header-cell *matHeaderCellDef>Sector</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.sector }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!--Empleado/a -->
+                                  <ng-container matColumnDef="empleado">
+                                      <th mat-header-cell *matHeaderCellDef>Empleado/a</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          <div *ngIf="element.empleado; else elseBlock">
+                                              {{ element.empleado }}
+                                          </div>
+                                          <ng-template #elseBlock>
+                                              Aún no tomado
+                                          </ng-template>
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Estado -->
+                                  <ng-container matColumnDef="estado">
+                                      <th mat-header-cell *matHeaderCellDef>Estado</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.estado }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <tr mat-header-row *matHeaderRowDef="
+                                displayedColumnsPedidoSectorSinAcciones
+                             "></tr>
+                                  <tr mat-row *matRowDef="
+                                let row;
+                                columns: displayedColumnsPedidoSectorSinAcciones
+                             "></tr>
+                              </table>
+  
+                              <ng-template #elseBlock>
+                                  <p>
+                                      <b> No hay artículos solicitados en este pedido.</b>
+                                  </p>
+                              </ng-template>
+                          </div>
+                      </div>
+                  </td>
+              </ng-container>
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsPedidoAdmin"></tr>
+              <tr mat-row *matRowDef="let element; columns: displayedColumnsPedidoAdmin" class="example-element-row" (click)="
+                 copiarObjetito(element);
+                 expandedElement =
+                    expandedElementEdit.id_comanda == element.id_comanda
+                       ? null
+                       : element
+              "></tr>
+              <!-- [class.example-expanded-row]="expandedElement === element" -->
+              <!-- (click)="expandedElement = expandedElement === element ? null : element;" -->
+              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+          </table>
+      </mat-expansion-panel>
+
+
+      <mat-expansion-panel *ngIf="dataUserForHome.perfil === 'Mozo'" (opened)="mesaElegida = null; clienteElegidoMesa = null">
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Asignar Mesa a Cliente
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para asignar una mesa.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+          <div class="container row">
+              <div class="col-6">
+                  <mat-accordion>
+                      <mat-expansion-panel (opened)="traerMesas()">
+                          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerMesas"></mat-progress-bar>
+                          <mat-expansion-panel-header>
+                              <mat-panel-title>
+                                  Elegir mesa
+                              </mat-panel-title>
+                              <mat-panel-description>
+                                  Seleccione una mesa.
+                              </mat-panel-description>
+                          </mat-expansion-panel-header>
+                          <div class="container row">
+                              <div class="col-sm-4" *ngFor="let mesa of mesas">
+                                  <div class="card" [ngClass]="{
+                                'text-white bg-success mb-3':
+                                   mesa.id_cliente == null,
+                                'text-white bg-danger mb-3':
+                                   mesa.id_cliente != null
+                             }" (click)="cargarMesa(mesa)">
+                                      <div class="card-inner">
+                                          <div class="header"></div>
+                                          <div class="content text-center">
+                                              <p>
+                                                  <b>{{ mesa.codigo_mesa }}</b>
+                                              </p>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </mat-expansion-panel>
+                      <mat-expansion-panel (opened)="traerClientes()">
+                          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerClientes"></mat-progress-bar>
+                          <mat-expansion-panel-header>
+                              <mat-panel-title>
+                                  Elegir Cliente
+                              </mat-panel-title>
+                              <mat-panel-description>
+                                  Seleccione un cliente.
+                              </mat-panel-description>
+                          </mat-expansion-panel-header>
+                          <div class="container row">
+                              <div class="col-sm-4" *ngFor="let cliente of clientes">
+                                  <div class="card" (click)="cargarCliente(cliente)">
+                                      <div class="image">
+                                          <img src="{{ pathToItemPhoto }}{{ cliente.foto }}" />
+                                      </div>
+                                      <div class="card-inner">
+                                          <div class="header"></div>
+                                          <div class="content">
+                                              <!-- <b><b>Nombre:</b></p> -->
+                                              {{ cliente.nombre }}
+                                              <!-- <b><b>Apellido:</b></p> -->
+                                              {{ cliente.apellido }}
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
+                          </div>
+                      </mat-expansion-panel>
+                  </mat-accordion>
+              </div>
+              <div class="col-6">
+                  <div class="card" *ngIf="clienteElegidoMesa != null || mesaElegida != null">
+                      <mat-progress-bar mode="indeterminate" *ngIf="spinnerAsignTable"></mat-progress-bar>
+                      <div class="card-inner">
+                          <div class="card-header d-flex justify-content-center">
+                              <mat-nav-list *ngIf="mesaElegida != null; else elseBlock">
+                                  <mat-list-item>
+                                      <a matLine>Mesa Elegida:</a>
+                                      <b>{{ mesaElegida.codigo_mesa }}</b>
+                                  </mat-list-item>
+                              </mat-nav-list>
+                              <ng-template #elseBlock>Debe elegir una mesa para verla aquí.</ng-template>
+                          </div>
+                          <div class="card-header d-flex justify-content-center">
+                              <mat-nav-list *ngIf="clienteElegidoMesa != null; else elseBlock">
+                                  <a matLine>Cliente Elegido: </a>
+                                  <b>{{
+                             clienteElegidoMesa.nombre +
+                                " " +
+                                clienteElegidoMesa.apellido
+                          }}</b>
+                              </mat-nav-list>
+                              <ng-template #elseBlock>Debe elegir un cliente para verlo aquí.</ng-template>
+                          </div>
+                          <div class="card-footer d-flex justify-content-center">
+                              <button mat-raised-button color="primary" (click)="AsignarMesa()">
+                                  Asignar
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+      </mat-expansion-panel>
+      <mat-expansion-panel (opened)="traerPedidosCliente()" (closed)="finalizarTraerPedidosCliente()" *ngIf="
+           dataUserForHome.perfil === 'Cliente'">
+          <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerPedidosCliente"></mat-progress-bar>
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Consultar Pedidos
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento para consultar los pedidos.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+  
+          <table mat-table [dataSource]="pedidosCliente" multiTemplateDataRows class="mat-elevation-z8">
+              <!-- Comanda -->
+              <ng-container matColumnDef="id_comanda">
+                  <th mat-header-cell *matHeaderCellDef>Comanda</th>
+                  <td mat-cell *matCellDef="let element">{{ element.id_comanda }}</td>
+              </ng-container>
+  
+              <!-- Mesa -->
+              <ng-container matColumnDef="codigo_mesa">
+                  <th mat-header-cell *matHeaderCellDef>Mesa</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.codigo_mesa }}
+                  </td>
+              </ng-container>
+  
+              <!--Estado -->
+              <ng-container matColumnDef="estado">
+                  <th mat-header-cell *matHeaderCellDef>Estado</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.estado | titlecase }}
+                  </td>
+              </ng-container>
+  
+              <!-- Fecha y Hora de Inicio -->
+              <ng-container matColumnDef="fecha_hora_inicio">
+                  <th mat-header-cell *matHeaderCellDef>Fecha y Hora de Inicio</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.fecha_hora_inicio }}
+                  </td>
+              </ng-container>
+  
+              <!-- Tiempo Estimado -->
+              <ng-container matColumnDef="tiempo_estimado_preparacion_minutos">
+                  <th mat-header-cell *matHeaderCellDef>Tiempo Estimado</th>
+                  <td mat-cell *matCellDef="let element">
+                      {{ element.tiempo_estimado_preparacion_minutos }}'
+                  </td>
+              </ng-container>
+  
+              <!-- Fecha y Hora de Fin -->
+              <ng-container matColumnDef="fecha_hora_fin">
+                  <th mat-header-cell *matHeaderCellDef>Fecha y Hora de Fin</th>
+  
+                  <td mat-cell *matCellDef="let element">
+                      <div *ngIf="element.fecha_hora_fin; else elseBlock">
+                          {{ element.fecha_hora_fin }}
+                      </div>
+                      <ng-template #elseBlock>
+                          Aún no finalizó el Pedido
+                      </ng-template>
+                  </td>
+              </ng-container>
+  
+              <!-- Tiempo Estimado -->
+              <ng-container matColumnDef="encuesta">
+                  <th mat-header-cell *matHeaderCellDef>Acciones</th>
+                  <td mat-cell *matCellDef="let element">
+                      <button type="button" class="btn" [ngClass]="{'btn-info animated infinite bounceIn slow': element.estado=='listo para servir' && element.pedido_encuesta == null, 'btn-outline-secondary':element.estado!='listo para servir'}" [disabled]="element.estado!='listo para servir'" (click)="openDialogEncuesta(element.id)" *ngIf="element.pedido_encuesta == null">Encuesta</button>
+                      <!-- <div *ngIf="element.pedido_encuesta != null" class="badge badge-success">
+                          Encuesta Completada.
+                       </div> -->
+                      <!-- <h1 *ngIf="element.pedido_encuesta != null" class="badge badge-success">Encuesta Completada.</h1> -->
+  
+                      <h4 *ngIf="element.pedido_encuesta != null"><span class="badge badge-success">Encuesta Completada.</span></h4>
+                  </td>
+              </ng-container>
+  
+              <!-- Expanded Content Column - The detail row is made up of this one column that spans across all columns -->
+              <ng-container matColumnDef="expandedDetail">
+                  <td mat-cell *matCellDef="let element" [attr.colspan]="displayedColumnsPedido.length">
+                      <div class="example-element-detail" [@detailExpand]="
+                       element.id_comanda == expandedElementEdit.id_comanda
+                          ? 'expanded'
+                          : 'collapsed'
+                    ">
+                          <!-- [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'"> -->
+  
+                          <div class="example-element-description">
+                              <table mat-table [dataSource]="element.pedidoItems" class="mat-elevation-z8" *ngIf="
+                             element.pedidoItems &&
+                                element.pedidoItems.length > 0;
+                             else elseBlock
+                          ">
+                                  <!-- <div class="example-element-description">
+                       <table
+                          mat-table
+                          [dataSource]="element.pedidoItems"
+                          class="mat-elevation-z8"
+                       > -->
+                                  <!-- Columna Nombre -->
+                                  <ng-container matColumnDef="nombre">
+                                      <th mat-header-cell *matHeaderCellDef>Artículo</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.nombre }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Cantidad -->
+                                  <ng-container matColumnDef="cantidad">
+                                      <th mat-header-cell *matHeaderCellDef>Cantidad</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.cantidad }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Foto -->
+                                  <ng-container matColumnDef="foto">
+                                      <th mat-header-cell *matHeaderCellDef>Foto</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          <!-- <image-upload
+                                                        (uploadFinished)="onUploadFinished($event)"
+                                                     ></image-upload> -->
+                                          <div class="parent">
+                                              <img class="img_resize" src="{{ pathToItemPhoto }}{{
+                                         element.foto
+                                      }}" />
+                                          </div>
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Sector -->
+                                  <ng-container matColumnDef="sector">
+                                      <th mat-header-cell *matHeaderCellDef>Sector</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.sector }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <!--Empleado/a -->
+                                  <ng-container matColumnDef="empleado">
+                                      <th mat-header-cell *matHeaderCellDef>Empleado/a</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          <div *ngIf="element.empleado; else elseBlock">
+                                              {{ element.empleado }}
+                                          </div>
+                                          <ng-template #elseBlock>
+                                              Aún no tomado
+                                          </ng-template>
+                                      </td>
+                                  </ng-container>
+  
+                                  <!-- Columna Estado -->
+                                  <ng-container matColumnDef="estado">
+                                      <th mat-header-cell *matHeaderCellDef>Estado</th>
+                                      <td mat-cell *matCellDef="let element">
+                                          {{ element.estado }}
+                                      </td>
+                                  </ng-container>
+  
+                                  <tr mat-header-row *matHeaderRowDef="
+                                displayedColumnsPedidoSectorSinAcciones
+                             "></tr>
+                                  <tr mat-row *matRowDef="
+                                let row;
+                                columns: displayedColumnsPedidoSectorSinAcciones
+                             "></tr>
+                              </table>
+  
+                              <ng-template #elseBlock>
+                                  <p>
+                                      <b> No hay artículos solicitados en este pedido.</b>
+                                  </p>
+                              </ng-template>
+                          </div>
+                      </div>
+                  </td>
+              </ng-container>
+  
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsPedidoCliente"></tr>
+              <tr mat-row *matRowDef="let element; columns: displayedColumnsPedidoCliente" class="example-element-row" (click)="
+                 copiarObjetito(element);
+                 expandedElement =
+                    expandedElementEdit.id_comanda == element.id_comanda
+                       ? null
+                       : element
+              "></tr>
+              <!-- [class.example-expanded-row]="expandedElement === element" -->
+              <!-- (click)="expandedElement = expandedElement === element ? null : element;" -->
+              <tr mat-row *matRowDef="let row; columns: ['expandedDetail']" class="example-detail-row"></tr>
+          </table>
+      </mat-expansion-panel>
+
+      <mat-expansion-panel (opened)="traerMesas()" *ngIf="dataUserForHome.perfil === 'Mozo' || dataUserForHome.perfil === 'Admin'">
+            <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerMesas"></mat-progress-bar>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Administrar Mesas
+                </mat-panel-title>
+                <mat-panel-description>
+                    Indicar estado de una mesa y/o verificarlo.
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+            <div class="container row">
+                <div class="col-sm-4" *ngFor="let mesa of mesas">
+                    <div class="card" [ngClass]="{
+                  'text-white bg-success mb-3':
+                     mesa.id_cliente == null,
+                  'text-white bg-danger mb-3':
+                     mesa.id_cliente != null
+                    }" (mouseenter)="enterCard('acciones'+mesa.mesa_id)"
+                       (mouseleave)="leaveCard('acciones'+mesa.mesa_id)">
+                        <div class="card-inner">
+                            <div class="header"></div>
+                            <div class="content text-center">
+                                <p>
+                                    <b>{{ mesa.codigo_mesa }}</b>
+                                </p>
+                                <h4 *ngIf="mesa.estado === 'cerrada' && mesa.id_cliente == null"><span class="badge badge-light">Libre</span></h4>
+                                <h4 *ngIf="mesa.estado === 'cerrada' && mesa.id_cliente != null"><span class="badge badge-warning">Ocupada</span></h4>
+                                <h4 *ngIf="mesa.estado === 'cliente comiendo' && mesa.id_cliente != null"><span class="badge badge-warning">Cliente Comiendo</span></h4>
+                                <h4 *ngIf="mesa.estado === 'cliente pagando' && mesa.id_cliente != null"><span class="badge badge-warning">Cliente Pagando</span></h4>
+                                <h4 *ngIf="mesa.estado === 'esperando pedido' && mesa.id_cliente != null"><span class="badge badge-warning">Cliente Esperando Pedido</span></h4>
+
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Basic example" *ngIf="mesa.id_cliente !== null && dataUserForHome.perfil == 'Mozo'" id="acciones{{mesa.mesa_id}}" style="display: none">
+                                        <button type="button" class="btn btn-primary" (click)="actualizarMesa('cliente comiendo', mesa.mesa_id)">Comiendo</button>
+                                        <button type="button" class="btn btn-primary" (click)="actualizarMesa('cliente pagando', mesa.mesa_id)">Pagando</button>
+                                </div>
+
+                                <div class="btn-group btn-group-sm" role="group" aria-label="Basic example" *ngIf="mesa.id_cliente !== null && dataUserForHome.perfil == 'Admin'" id="acciones{{mesa.mesa_id}}" style="display: none">
+                                    <button type="button" class="btn btn-primary" (click)="cerrarMesa('cerrada', mesa.mesa_id)">Cerrar</button>
+                            </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </mat-expansion-panel>
+
+      <mat-expansion-panel *ngIf="
+           dataUserForHome.perfil === 'Admin'">
+          <mat-expansion-panel-header>
+              <mat-panel-title>
+                  Reportes
+              </mat-panel-title>
+              <mat-panel-description>
+                  Segmento en el cual se pueden obtener reportes variados.
+              </mat-panel-description>
+          </mat-expansion-panel-header>
+
+          <mat-expansion-panel (opened)="traerReportes('/reporte/empleado/ingresos')">
+              <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerReportes"></mat-progress-bar>
+              <mat-expansion-panel-header>
+                  <mat-panel-title>
+                      Empleados y Clientes
+                  </mat-panel-title>
+                  <mat-panel-description>
+                      Días y horarios de ingreso al sistema.
+                  </mat-panel-description>
+              </mat-expansion-panel-header>
+
+              <div class="container">
+                    <div class="row justify-content-md-end">
+                        <div *ngIf="!spinnerTraerReportes">
+                                <button type="button" class="btn btn-success"
+                                (click)="exportexcel('ReporteIngresos','tablauno')">Exportar Excel</button>
+                        </div>
+                    </div>
+               </div>         
+
+              <div class="example-container mat-elevation-z8" *ngIf="!spinnerTraerReportes">
+                  <table mat-table [dataSource]="reportes" id="tablauno">
+  
+                      <ng-container matColumnDef="Fecha_Hora_Ingreso">
+                          <th mat-header-cell *matHeaderCellDef> Fecha Hora Ingreso </th>
+                          <td mat-cell *matCellDef="let element"> {{element.Fecha_Hora_Ingreso}} </td>
+                      </ng-container>
+  
+                      <ng-container matColumnDef="nombre">
+                          <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                          <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+                      </ng-container>
+  
+                      <ng-container matColumnDef="apellido">
+                          <th mat-header-cell *matHeaderCellDef> Apellido </th>
+                          <td mat-cell *matCellDef="let element"> {{element.apellido}} </td>
+                      </ng-container>
+  
+                      <ng-container matColumnDef="perfil">
+                          <th mat-header-cell *matHeaderCellDef> Perfil </th>
+                          <td mat-cell *matCellDef="let element"> {{element.perfil}} </td>
+                      </ng-container>
+  
+                      <tr mat-header-row *matHeaderRowDef="displayedColumnsReporteIngreso; sticky: true"></tr>
+                      <tr mat-row *matRowDef="let row; columns: displayedColumnsReporteIngreso;"></tr>
+                  </table>
+              </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel (opened)="traerReportes('/reporte/empleado/operacionessector')">
+            <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerReportes"></mat-progress-bar>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Operaciones por Sector
+                </mat-panel-title>
+                <mat-panel-description>
+                    Cantidad de operaciones por sector.
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="container">
+                  <div class="row justify-content-md-end">
+                      <div *ngIf="!spinnerTraerReportes">
+                              <button type="button" class="btn btn-success"
+                              (click)="exportexcel('ReporteOperacionesSector','tablados')">Exportar Excel</button>
+                      </div>
+                  </div>
+             </div>         
+
+            <div class="mat-elevation-z8" *ngIf="!spinnerTraerReportes">
+                <table mat-table [dataSource]="reportes" id="tablados">
+
+                    <ng-container matColumnDef="SECTOR">
+                        <th mat-header-cell *matHeaderCellDef> Sector </th>
+                        <td mat-cell *matCellDef="let element"> {{element.SECTOR}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="CANTIDAD">
+                        <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                        <td mat-cell *matCellDef="let element"> {{element.CANTIDAD}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsOperacionesSector; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsOperacionesSector;"></tr>
+                </table>
+            </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel (opened)="traerReportes('/reporte/empleado/operacionessectorempleados')">
+            <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerReportes"></mat-progress-bar>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Operaciones por Sector y Empleado
+                </mat-panel-title>
+                <mat-panel-description>
+                    Cantidad de operaciones por sector, listada por cada empleado.
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="container">
+                  <div class="row justify-content-md-end">
+                      <div *ngIf="!spinnerTraerReportes">
+                              <button type="button" class="btn btn-success"
+                              (click)="exportexcel('ReporteOperacionesSectorEmpleado','tablatres')">Exportar Excel</button>
+                      </div>
+                  </div>
+             </div>         
+
+            <div class="mat-elevation-z8" *ngIf="!spinnerTraerReportes">
+                <table mat-table [dataSource]="reportes" id="tablatres">
+
+                    <ng-container matColumnDef="nombre">
+                        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                        <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="apellido">
+                        <th mat-header-cell *matHeaderCellDef> Apellido </th>
+                        <td mat-cell *matCellDef="let element"> {{element.apellido}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="SECTOR">
+                        <th mat-header-cell *matHeaderCellDef> Sector </th>
+                        <td mat-cell *matCellDef="let element"> {{element.SECTOR}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="CANTIDAD">
+                        <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                        <td mat-cell *matCellDef="let element"> {{element.CANTIDAD}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsOperacionesSectorYEmpleado; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsOperacionesSectorYEmpleado;"></tr>
+                </table>
+            </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel (opened)="traerReportes('/reporte/pedido/masvendido')">
+            <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerReportes"></mat-progress-bar>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Productos mas vendidos
+                </mat-panel-title>
+                <mat-panel-description>
+                    El o los productos más vendidos.
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="container">
+                  <div class="row justify-content-md-end">
+                      <div *ngIf="!spinnerTraerReportes">
+                              <button type="button" class="btn btn-success"
+                              (click)="exportexcel('ReporteProductoMasVendido','tablacuatro')">Exportar Excel</button>
+                      </div>
+                  </div>
+             </div>         
+
+            <div class="mat-elevation-z8" *ngIf="!spinnerTraerReportes">
+                <table mat-table [dataSource]="reportes" id="tablacuatro">
+
+                    <ng-container matColumnDef="nombre">
+                        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                        <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="CANTIDAD">
+                        <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                        <td mat-cell *matCellDef="let element"> {{element.CANTIDAD}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="precio">
+                        <th mat-header-cell *matHeaderCellDef> Precio </th>
+                        <td mat-cell *matCellDef="let element"> {{element.precio}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="sector">
+                        <th mat-header-cell *matHeaderCellDef> Sector </th>
+                        <td mat-cell *matCellDef="let element"> {{element.sector}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="tiempo_estimado_preparacion">
+                        <th mat-header-cell *matHeaderCellDef> Tiempo de Preparación </th>
+                        <td mat-cell *matCellDef="let element"> {{element.tiempo_estimado_preparacion}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsProductoVendido; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsProductoVendido;"></tr>
+                </table>
+            </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel (opened)="traerReportes('/reporte/pedido/menosvendido')">
+            <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerReportes"></mat-progress-bar>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Productos menos vendidos
+                </mat-panel-title>
+                <mat-panel-description>
+                    El o los productos menos vendidos.
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="container">
+                  <div class="row justify-content-md-end">
+                      <div *ngIf="!spinnerTraerReportes">
+                              <button type="button" class="btn btn-success"
+                              (click)="exportexcel('ReporteProductoMenosVendido','tablacinco')">Exportar Excel</button>
+                      </div>
+                  </div>
+             </div>         
+
+            <div class="mat-elevation-z8" *ngIf="!spinnerTraerReportes">
+                <table mat-table [dataSource]="reportes" id="tablacinco">
+
+                    <ng-container matColumnDef="nombre">
+                        <th mat-header-cell *matHeaderCellDef> Nombre </th>
+                        <td mat-cell *matCellDef="let element"> {{element.nombre}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="CANTIDAD">
+                        <th mat-header-cell *matHeaderCellDef> Cantidad </th>
+                        <td mat-cell *matCellDef="let element"> {{element.CANTIDAD}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="precio">
+                        <th mat-header-cell *matHeaderCellDef> Precio </th>
+                        <td mat-cell *matCellDef="let element"> {{element.precio}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="sector">
+                        <th mat-header-cell *matHeaderCellDef> Sector </th>
+                        <td mat-cell *matCellDef="let element"> {{element.sector}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="tiempo_estimado_preparacion">
+                        <th mat-header-cell *matHeaderCellDef> Tiempo de Preparación </th>
+                        <td mat-cell *matCellDef="let element"> {{element.tiempo_estimado_preparacion}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsProductoVendido; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsProductoVendido;"></tr>
+                </table>
+            </div>
+          </mat-expansion-panel>
+
+          <mat-expansion-panel (opened)="traerReportes('/reporte/pedido/fueradetiempo')">
+            <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerReportes"></mat-progress-bar>
+            <mat-expansion-panel-header>
+                <mat-panel-title>
+                    Pedidos Demorados
+                </mat-panel-title>
+                <mat-panel-description>
+                    Pedidos que se demoraron mas de lo estimado.
+                </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <div class="container">
+                  <div class="row justify-content-md-end">
+                      <div *ngIf="!spinnerTraerReportes">
+                              <button type="button" class="btn btn-success"
+                              (click)="exportexcel('ReportePedidosDemorados','tablaseis')">Exportar Excel</button>
+                      </div>
+                  </div>
+             </div>         
+
+            <div class="mat-elevation-z8" *ngIf="!spinnerTraerReportes">
+                <table mat-table [dataSource]="reportes" id="tablaseis">
+
+                    <ng-container matColumnDef="comanda">
+                        <th mat-header-cell *matHeaderCellDef> Comanda </th>
+                        <td mat-cell *matCellDef="let element"> {{element.comanda}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="demora">
+                        <th mat-header-cell *matHeaderCellDef> Demora </th>
+                        <td mat-cell *matCellDef="let element"> {{element.demora}} </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumnsPedidosDemorados; sticky: true"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumnsPedidosDemorados;"></tr>
+                </table>
+            </div>
+          </mat-expansion-panel>
+          
+      </mat-expansion-panel>
+
+      <mat-expansion-panel (opened)="traerEncuestas()" *ngIf="dataUserForHome.perfil === 'Mozo' || dataUserForHome.perfil === 'Admin'">
+        <mat-progress-bar mode="indeterminate" *ngIf="spinnerTraerEncuestas"></mat-progress-bar>
+        <mat-expansion-panel-header>
+            <mat-panel-title>
+                Encuestas
+            </mat-panel-title>
+            <mat-panel-description>
+                Segmento ver las encuestas realizadas.
+            </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <div class="container">
+            <div class="row justify-content-md-end">
+                <div *ngIf="!spinnerTraerReportes">
+                        <button type="button" class="btn btn-success"
+                        (click)="exportexcel('Encuestas','tabladiez')">Exportar Excel</button>
+                </div>
+            </div>
+       </div>
+
+        <table mat-table [dataSource]="encuestas" class="mat-elevation-z8" id="tabladiez">
+            
+            <ng-container matColumnDef="id_comanda">
+                <th mat-header-cell *matHeaderCellDef>Comanda</th>
+                <td mat-cell *matCellDef="let element">{{ element.id_comanda }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="mesa">
+                <th mat-header-cell *matHeaderCellDef>Mesa</th>
+                <td mat-cell *matCellDef="let element">{{ element.mesa }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="restaurante">
+                <th mat-header-cell *matHeaderCellDef>Restaurante</th>
+                <td mat-cell *matCellDef="let element">{{ element.restaurante }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="mozo">
+                <th mat-header-cell *matHeaderCellDef>Mozo</th>
+                <td mat-cell *matCellDef="let element">{{ element.mozo }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="cocinero">
+                <th mat-header-cell *matHeaderCellDef>Cocinero</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.cocinero }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="bartender">
+                <th mat-header-cell *matHeaderCellDef>Bartender</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.bartender }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="cervecero">
+                <th mat-header-cell *matHeaderCellDef>Cervecero</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.cervecero }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="precio_calidad">
+                <th mat-header-cell *matHeaderCellDef>Precio/Calidad</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.precio_calidad }}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="descripcion">
+                <th mat-header-cell *matHeaderCellDef>Descripcion</th>
+                <td mat-cell *matCellDef="let element">
+                    {{ element.descripcion }}
+                </td>
+            </ng-container>
+
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsEncuestas"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsEncuestas"></tr>
+        </table>
+    </mat-expansion-panel>
+  </mat-accordion>

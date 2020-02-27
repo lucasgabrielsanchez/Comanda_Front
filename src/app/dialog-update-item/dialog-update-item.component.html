@@ -1,0 +1,40 @@
+<mat-progress-bar
+   mode="indeterminate"
+   *ngIf="spinnerModificarItem"
+></mat-progress-bar>
+<form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+   <mat-form-field class="example-full-width">
+      <input matInput placeholder="Nombre" formControlName="nombre" />
+   </mat-form-field>
+
+   <mat-form-field class="example-full-width">
+      <input matInput placeholder="Precio" formControlName="precio" />
+   </mat-form-field>
+
+   <mat-form-field class="example-full-width">
+      <input matInput placeholder="Sector" formControlName="sector" />
+   </mat-form-field>
+
+   <mat-form-field class="example-full-width">
+      <input matInput placeholder="Estado" formControlName="estado" />
+   </mat-form-field>
+
+   <mat-form-field class="example-full-width">
+      <input
+         matInput
+         placeholder="Tiempo Estimado de Preparación"
+         formControlName="tiempo_estimado_preparacion"
+      />
+   </mat-form-field>
+
+   <image-upload (uploadFinished)="onUploadFinished($event)"></image-upload>
+
+   <button
+      mat-raised-button
+      color="primary"
+      type="submit"
+      [disabled]="!profileForm.valid"
+   >
+      Modificar
+   </button>
+</form>

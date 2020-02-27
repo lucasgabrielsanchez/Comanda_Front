@@ -1,0 +1,276 @@
+<div class="card">
+   <!-- <h4 class="card-header text-center">
+      Su devolución nos ayuda a mejorar
+   </h4> -->
+   <div class="alert alert-success text-center" role="alert">
+      <h4 class="alert-heading">Su devolución nos ayuda a mejorar</h4>
+   </div>
+   <div class="card-body text-center">
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit2()">
+         <div class="form-group row">
+            <label for="mesa" class="col-sm-2 col-form-label">Mesa</label>
+            <div class="col-sm-3">
+               <select
+                  class="form-control"
+                  id="mesa"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.mesa.errors
+                  }"
+                  formControlName="mesa"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.mesa.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.mesa.errors.required">
+                     La puntuación de la Mesa es requerida.
+                  </div>
+               </div>
+            </div>
+
+            <label for="restaurante" class="col-sm-3 col-form-label"
+               >Restaurante</label
+            >
+            <div class="col-sm-3">
+               <select
+                  class="form-control"
+                  id="restaurante"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.restaurante.errors
+                  }"
+                  formControlName="restaurante"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.restaurante.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.restaurante.errors.required">
+                     La puntuación del Restaurante es requerida
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="form-group row">
+            <label for="mozo" class="col-sm-2 col-form-label">Mozo</label>
+            <div class="col-sm-3">
+               <select
+                  class="form-control"
+                  id="mozo"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.mozo.errors
+                  }"
+                  formControlName="mozo"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.mozo.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.mozo.errors.required">
+                     La puntuación del Mozo es requerida
+                  </div>
+               </div>
+            </div>
+
+            <label for="cocinero" class="col-sm-3 col-form-label"
+               >Cocinero</label
+            >
+            <div class="col-sm-3">
+               <select
+                  class="form-control"
+                  id="cocinero"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.cocinero.errors
+                  }"
+                  formControlName="cocinero"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.cocinero.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.cocinero.errors.required">
+                     La puntuación del Cocinero es requerida
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="form-group row">
+            <label for="bartender" class="col-sm-5 col-form-label"
+               >Bartender</label
+            >
+            <div class="col-sm-6">
+               <select
+                  class="form-control"
+                  id="bartender"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.bartender.errors
+                  }"
+                  formControlName="bartender"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.bartender.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.bartender.errors.required">
+                     La puntuación del Bartender es requerida
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="form-group row">
+            <label for="cervecero" class="col-sm-5 col-form-label"
+               >Cervecero</label
+            >
+            <div class="col-sm-6">
+               <select
+                  class="form-control"
+                  id="cervecero"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.cervecero.errors
+                  }"
+                  formControlName="cervecero"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.cervecero.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.cervecero.errors.required">
+                     La puntuación del Cervecero es requerida
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="form-group row">
+            <label for="precio_calidad" class="col-sm-5 col-form-label"
+               >Precio/Calidad</label
+            >
+            <div class="col-sm-6">
+               <select
+                  class="form-control"
+                  id="precio_calidad"
+                  [ngClass]="{
+                     'is-invalid': submitted2 && fr.precio_calidad.errors
+                  }"
+                  formControlName="precio_calidad"
+               >
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+               </select>
+               <div
+                  *ngIf="submitted2 && fr.precio_calidad.errors"
+                  class="invalid-feedback"
+               >
+                  <div *ngIf="fr.precio_calidad.errors.required">
+                     La puntuación del Precio/Calidad es requerida
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <div class="form-group" style="width: 100%;">
+            <mat-form-field class="example-full-width" style="width: 100%;">
+               <input
+                  matInput
+                  #message
+                  maxlength="66"
+                  placeholder="Breve Descripción de la Experiencia"
+                  formControlName="descripcion"
+               />
+               <mat-hint align="start"
+                  ><strong>Escriba una opinión si lo desea</strong>
+               </mat-hint>
+               <mat-hint align="end">{{ message.value.length }} / 66</mat-hint>
+            </mat-form-field>
+         </div>
+         <button
+            [disabled]="loadingRegister"
+            class="btn btn-success"
+            (click)="onSubmit2()"
+         >
+            <span
+               *ngIf="loadingRegister"
+               class="spinner-border spinner-border-sm mr-1"
+            ></span>
+            Enviar
+         </button>
+      </form>
+      <br />
+   </div>
+</div>
