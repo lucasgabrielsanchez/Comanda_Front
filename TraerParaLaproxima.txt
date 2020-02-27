@@ -1,0 +1,10 @@
+-Crear Pipes.
+-Crear Directivas.
+-Componentes dentro de otros con uso de input y output.
+-https://www.highcharts.com/ ofrece entre otras cosas, la generación de un PDF.
+-Responsive Mediaquery.
+-Refresco automático de los datos en el Front.
+-Que el cliente pueda pedir la cuenta y también vea el estado de servido (estado nuevo).
+-Agregar más información para que el cliente entienda, por ejemplo en la parte de la encuesta indicar lo que tiene que hacer y para qué es.
+-Agregar gráficos estadísticos, una opción entre varias, es usar https://www.highcharts.com/, se le pasa un json y genera gráficos estadísticos.
+-Agreagar posibles estados a la comanda, uno que vá seguro es el de "Servido".
